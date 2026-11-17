@@ -32,3 +32,5 @@ python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py test
 ```
+
+Cada pull request para a branch `main` executa essas verificações no GitHub Actions com PostgreSQL 16 temporário. A suíte usa um banco de teste criado pelo Django e as credenciais do workflow são exclusivas do ambiente descartável da execução.
