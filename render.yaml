@@ -1,0 +1,28 @@
+databases:
+  - name: sisweb-gestao-demo-db
+    plan: free
+    databaseName: gestao
+    postgresMajorVersion: "16"
+    ipAllowList: []
+
+services:
+  - type: web
+    name: sisweb-gestao-demo
+    runtime: python
+    plan: free
+    healthCheckPath: /healthz/
+    buildCommand: python -m pip install -r requirements-production.txt && python manage.py check && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py bootstrap_admin
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.production
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sisweb-gestao-demo-db
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: "1"

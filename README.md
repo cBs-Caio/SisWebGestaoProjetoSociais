@@ -34,3 +34,11 @@ python manage.py test
 ```
 
 Cada pull request para a branch `main` executa essas verificações no GitHub Actions com PostgreSQL 16 temporário. A suíte usa um banco de teste criado pelo Django e as credenciais do workflow são exclusivas do ambiente descartável da execução.
+
+## Publicar a demonstração no Render
+
+O arquivo `render.yaml` provisiona um serviço web e um PostgreSQL 16 gratuitos. No Render, crie um Blueprint selecionando a branch que contém esse arquivo. A publicação instala as dependências, coleta os arquivos estáticos, aplica as migrações e inicia o Gunicorn. Em produção, `config.production` desativa a depuração e carrega a conexão e a chave secreta do ambiente.
+
+Para criar a conta inicial, defina `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` e `DJANGO_SUPERUSER_PASSWORD` nas variáveis privadas do serviço e execute um novo deploy. Depois de entrar em `/admin/`, retire essas variáveis da configuração. Cadastre somente dados fictícios na instância de demonstração.
+
+O Render consulta `/healthz/`. O endpoint retorna HTTP 200 quando o Django consegue consultar o banco e HTTP 503 quando a consulta falha. O resultado de indisponibilidade não expõe detalhes da conexão.
