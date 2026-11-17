@@ -1,0 +1,52 @@
+name: Django
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  postgres:
+    name: Django com PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gestao_ci
+          POSTGRES_USER: gestao_ci
+          POSTGRES_PASSWORD: gestao_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gestao_ci -d gestao_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_DB: gestao_ci
+      POSTGRES_USER: gestao_ci
+      POSTGRES_PASSWORD: gestao_ci
+      POSTGRES_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependências
+        run: python -m pip install -r requirements.txt
+      - name: Verificar configuração e migrações
+        run: |
+          python manage.py check
+          python manage.py makemigrations --check --dry-run
+          python manage.py migrate --noinput
+      - name: Executar testes
+        run: python manage.py test
