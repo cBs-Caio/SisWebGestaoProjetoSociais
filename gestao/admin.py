@@ -23,8 +23,12 @@ class InscricaoAdmin(admin.ModelAdmin):
 
 @admin.register(Frequencia)
 class FrequenciaAdmin(admin.ModelAdmin):
-    list_display = ("inscricao", "data", "presente")
+    list_display = ("inscricao", "data", "situacao")
     list_filter = ("presente", "data")
     search_fields = ("inscricao__participante__nome", "inscricao__curso__nome")
     autocomplete_fields = ("inscricao",)
     list_select_related = ("inscricao__participante", "inscricao__curso")
+
+    @admin.display(description="Situação da frequência", ordering="presente")
+    def situacao(self, frequencia):
+        return "Presente" if frequencia.presente else "Ausente"
